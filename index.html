@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maharashtra Municipal Advertisement Licensing System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Advertisement Script -->
+    <script src="scripts/advertisement.js"></script>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <!-- Esri Leaflet Geocoder -->
+    <script src="https://unpkg.com/esri-leaflet@3.0.10/dist/esri-leaflet.js"></script>
+    <script src="https://unpkg.com/esri-leaflet-geocoder@3.1.3/dist/esri-leaflet-geocoder.js"></script>
+    <!-- Map Integration Script -->
+    <script src="scripts/map-integration.js"></script>
+    <style>
+        /* Add map container style */
+        #map { min-height: 300px; }
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .form-step {
+            display: none;
+        }
+        .form-step.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <header class="bg-blue-800 text-white py-4 shadow-md">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-ad text-2xl"></i>
+                <h1 class="text-xl font-bold">Maharashtra Municipal Advertisement Licensing</h1>
+            </div>
+            <div class="text-sm">
+                <span id="application-number" class="bg-blue-700 px-3 py-1 rounded">Application: --------</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Progress Tracker -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-2">
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: 20%"></div>
+                </div>
+            </div>
+            <div class="flex justify-between">
+                <div class="text-center">
+                    <div class="w-8 h-8 mx-auto rounded-full bg-blue-600 text-white flex items-center justify-center">1</div>
+                    <p class="text-xs mt-1 font-medium">Applicant Info</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-8 h-8 mx-auto rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">2</div>
+                    <p class="text-xs mt-1 text-gray-500">Advertisement</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-8 h-8 mx-auto rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">3</div>
+                    <p class="text-xs mt-1 text-gray-500">Location</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-8 h-8 mx-auto rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">4</div>
+                    <p class="text-xs mt-1 text-gray-500">Documents</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-8 h-8 mx-auto rounded-full bg-gray-200 text-gray-600 flex items-center justify-center">5</div>
+                    <p class="text-xs mt-1 text-gray-500">Payment</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Steps -->
+        <form id="license-application" class="bg-white rounded-lg shadow-md p-6">
+            <!-- Step 1: Applicant Information -->
+            <div id="step-1" class="form-step active">
+                <h2 class="text-xl font-semibold mb-4 text-blue-800 border-b pb-2">Applicant Information</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Personal Information -->
+                    <div class="space-y-4">
+                        <h3 class="font-medium text-gray-700">Personal Details</h3>
+                        
+                        <div>
+                            <label for="applicant-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name*</label>
+                            <input type="text" id="applicant-name" name="applicant-name" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   maxlength="100" required>
+                            <p class="text-xs text-gray-500 mt-1">Maximum 100 characters</p>
+                        </div>
+
+                        <div>
+                            <label for="applicant-email" class="block text-sm font-medium text-gray-700 mb-1">Email*</label>
+                            <input type="email" id="applicant-email" name="applicant-email" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   required>
+                        </div>
+
+                        <div>
+                            <label for="applicant-phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number*</label>
+                            <input type="tel" id="applicant-phone" name="applicant-phone" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   pattern="[0-9]{10}" required>
+                            <p class="text-xs text-gray-500 mt-1">10 digit mobile number</p>
+                        </div>
+                    </div>
+
+                    <!-- Business Information -->
+                    <div class="space-y-4">
+                        <h3 class="font-medium text-gray-700">Business Details</h3>
+                        
+                        <div>
+                            <label for="business-type" class="block text-sm font-medium text-gray-700 mb-1">Business Type*</label>
+                            <select id="business-type" name="business-type" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required>
+                                <option value="">Select business type</option>
+                                <option value="proprietary">Proprietary</option>
+                                <option value="company">Company</option>
+                                <option value="trust">Trust</option>
+                                <option value="individual">Individual</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="gst-number" class="block text-sm font-medium text-gray-700 mb-1">GST Number*</label>
+                            <input type="text" id="gst-number" name="gst-number" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   pattern="[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}" required>
+                            <p class="text-xs text-gray-500 mt-1">Format: 22AAAAA0000A1Z5</p>
+                        </div>
+
+                        <div>
+                            <label for="shop-registration" class="block text-sm font-medium text-gray-700 mb-1">Maharashtra Shops Establishment Registration*</label>
+                            <input type="file" id="shop-registration" name="shop-registration" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   accept=".pdf,.jpg,.jpeg,.png" required>
+                            <p class="text-xs text-gray-500 mt-1">Upload scanned copy (PDF, JPG, PNG)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button type="button" onclick="nextStep(2)" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Next: Advertisement Details <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Advertisement Specifications -->
+            <div id="step-2" class="form-step">
+                <h2 class="text-xl font-semibold mb-4 text-blue-800 border-b pb-2">Advertisement Specifications</h2>
+                
+                <div class="space-y-6">
+                    <!-- Advertisement Type -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Advertisement Type*</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="border rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                                 onclick="selectAdType('hoarding')">
+                                <i class="fas fa-rectangle-ad text-3xl text-blue-600 mb-2"></i>
+                                <p class="font-medium">Hoarding</p>
+                                <p class="text-xs text-gray-500">Max 10x5 meters</p>
+                            </div>
+                            <div class="border rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                                 onclick="selectAdType('building-wrap')">
+                                <i class="fas fa-building text-3xl text-blue-600 mb-2"></i>
+                                <p class="font-medium">Building Wrap</p>
+                                <p class="text-xs text-gray-500">Full building coverage</p>
+                            </div>
+                            <div class="border rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                                 onclick="selectAdType('balloon')">
+                                <i class="fas fa-cloud text-3xl text-blue-600 mb-2"></i>
+                                <p class="font-medium">Balloon</p>
+                                <p class="text-xs text-gray-500">Max 5m diameter</p>
+                            </div>
+                            <div class="border rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                                 onclick="selectAdType('business-sign')">
+                                <i class="fas fa-store text-3xl text-blue-600 mb-2"></i>
+                                <p class="font-medium">Business Sign</p>
+                                <p class="text-xs text-gray-500">Shop premises</p>
+                            </div>
+                        </div>
+                        <input type="hidden" id="ad-type" name="ad-type" required>
+                    </div>
+
+                    <!-- Dimensions -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="ad-width" class="block text-sm font-medium text-gray-700 mb-1">Width (meters)*</label>
+                            <input type="number" id="ad-width" name="ad-width" min="0.1" max="20" step="0.1"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   required>
+                        </div>
+                        <div>
+                            <label for="ad-height" class="block text-sm font-medium text-gray-700 mb-1">Height (meters)*</label>
+                            <input type="number" id="ad-height" name="ad-height" min="0.1" max="20" step="0.1"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Area Calculation -->
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm font-medium text-gray-700">Total Area</p>
+                                <p id="ad-area" class="text-xl font-bold text-blue-800">0 m²</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-700">Maximum Allowed</p>
+                                <p id="max-allowed" class="text-xl font-bold text-gray-700">50 m²</p>
+                            </div>
+                        </div>
+                        <div class="mt-2 w-full bg-gray-200 rounded-full h-2.5">
+                            <div id="area-progress" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <p id="area-warning" class="text-xs text-red-600 mt-1 hidden">Exceeds maximum allowed area!</p>
+                    </div>
+
+                    <!-- Illumination Details -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Illumination*</label>
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <input type="radio" id="illumination-none" name="illumination" value="none" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+                                <label for="illumination-none" class="ml-2 block text-sm text-gray-700">No Illumination</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="illumination-led" name="illumination" value="led" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+                                <label for="illumination-led" class="ml-2 block text-sm text-gray-700">LED</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="illumination-neon" name="illumination" value="neon" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+                                <label for="illumination-neon" class="ml-2 block text-sm text-gray-700">Neon</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="illumination-backlit" name="illumination" value="backlit" class="h-4 w-4 text-blue-600 focus:ring-blue-500">
+                                <label for="illumination-backlit" class="ml-2 block text-sm text-gray-700">Backlit</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Illumination Options (Conditional) -->
+                    <div id="illumination-options" class="hidden space-y-4">
+                        <div>
+                            <label for="luminance" class="block text-sm font-medium text-gray-700 mb-1">Luminance (cd/m²)*</label>
+                            <input type="number" id="luminance" name="luminance" min="100" max="2000" step="50"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">Must be between 100-2000 cd/m²</p>
+                        </div>
+                        <div>
+                            <label for="timer" class="block text-sm font-medium text-gray-700 mb-1">Automatic Shut-off Time*</label>
+                            <select id="timer" name="timer"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="10pm">10:00 PM</option>
+                                <option value="10:30pm">10:30 PM</option>
+                                <option value="11pm" selected>11:00 PM (Default)</option>
+                                <option value="11:30pm">11:30 PM</option>
+                                <option value="12am">12:00 AM</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">As per Rule 5(i): Must not exceed 11:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-between">
+                    <button type="button" onclick="prevStep(1)" 
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                        <i class="fas fa-arrow-left mr-2"></i> Back
+                    </button>
+                    <button type="button" onclick="nextStep(3)" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Next: Location Details <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Location Details -->
+            <div id="step-3" class="form-step">
+                <h2 class="text-xl font-semibold mb-4 text-blue-800 border-b pb-2">Location Details</h2>
+                
+                <div class="space-y-6">
+                    <!-- Map Container -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Location*</label>
+                        <div id="map" class="h-64 w-full rounded-lg border border-gray-300"></div>
+                        <p class="text-xs text-gray-500 mt-1">Click on the map to select location or search below</p>
+                    </div>
+
+                    <!-- Address Search -->
+                    <div>
+                        <label for="location-search" class="block text-sm font-medium text-gray-700 mb-1">Search Address*</label>
+                        <div class="relative">
+                            <input type="text" id="location-search" name="location-search"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Search for an address..." required>
+                            <button type="button" id="search-button" 
+                                    class="absolute right-2 top-2 text-gray-500 hover:text-blue-600">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Location Details -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="location-address" class="block text-sm font-medium text-gray-700 mb-1">Full Address*</label>
+                            <input type="text" id="location-address" name="location-address"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   required readonly>
+                        </div>
+                        <div>
+                            <label for="location-coords" class="block text-sm font-medium text-gray-700 mb-1">Coordinates*</label>
+                            <input type="text" id="location-coords" name="location-coords"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   required readonly>
+                        </div>
+                    </div>
+
+                    <!-- Road Specifications -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Road Specifications*</label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="road-width" class="block text-xs font-medium text-gray-700 mb-1">Road Width (m)*</label>
+                                <input type="number" id="road-width" name="road-width" min="1" max="100" step="0.5"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                       required>
+                            </div>
+                            <div>
+                                <label for="traffic-volume" class="block text-xs font-medium text-gray-700 mb-1">Traffic Volume*</label>
+                                <select id="traffic-volume" name="traffic-volume"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        required>
+                                    <option value="">Select volume</option>
+                                    <option value="low">Low (Under 5,000 vehicles/day)</option>
+                                    <option value="medium">Medium (5,000-15,000 vehicles/day)</option>
+                                    <option value="high">High (Over 15,000 vehicles/day)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="visibility" class="block text-xs font-medium text-gray-700 mb-1">Visibility*</label>
+                                <select id="visibility" name="visibility"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        required>
+                                    <option value="">Select visibility</option>
+                                    <option value="excellent">Excellent (Unobstructed view)</option>
+                                    <option value="good">Good (Minor obstructions)</option>
+                                    <option value="poor">Poor (Major obstructions)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Zone Restrictions -->
+                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                        <h3 class="font-medium text-yellow-800 mb-2">Zone Restrictions</h3>
+                        <div id="zone-warnings" class="text-sm text-yellow-700 space-y-1">
+                            <p>Select a location to view applicable restrictions</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-between">
+                    <button type="button" onclick="prevStep(2)" 
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                        <i class="fas fa-arrow-left mr-2"></i> Back
+                    </button>
+                    <button type="button" onclick="nextStep(4)" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Next: Supporting Documents <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Supporting Documents (Placeholder) -->
+            <div id="step-4" class="form-step">
+                <h2 class="text-xl font-semibold mb-4 text-blue-800 border-b pb-2">Supporting Documents</h2>
+                <p class="text-gray-500">Document upload section will be implemented here</p>
+                <div class="mt-8 flex justify-between">
+                    <button type="button" onclick="prevStep(3)" 
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                        <i class="fas fa-arrow-left mr-2"></i> Back
+                    </button>
+                    <button type="button" onclick="nextStep(5)" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Next: Payment <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 5: Payment (Placeholder) -->
+            <div id="step-5" class="form-step">
+                <h2 class="text-xl font-semibold mb-4 text-blue-800 border-b pb-2">Payment & Submission</h2>
+                <p class="text-gray-500">Payment section will be implemented here</p>
+                <div class="mt-8 flex justify-between">
+                    <button type="button" onclick="prevStep(4)" 
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                        <i class="fas fa-arrow-left mr-2"></i> Back
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                        Submit Application <i class="fas fa-check ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <footer class="bg-gray-100 py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-gray-600 text-sm">
+            <p>© 2023 Maharashtra Municipal Corporation. All rights reserved.</p>
+            <div class="mt-2">
+                <a href="#" class="text-blue-600 hover:underline">Terms of Service</a> | 
+                <a href="#" class="text-blue-600 hover:underline">Privacy Policy</a> | 
+                <a href="#" class="text-blue-600 hover:underline">Help Center</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Generate application reference number
+        function generateApplicationNumber() {
+            const now = new Date();
+            const year = now.getFullYear().toString().slice(-2);
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            
+            return `MUM-AD-${year}${month}${day}-${randomNum}`;
+        }
+
+        // Set application number on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const appNumber = generateApplicationNumber();
+            document.getElementById('application-number').textContent = `Application: ${appNumber}`;
+        });
+
+        // Form navigation functions
+        function showStep(stepNumber) {
+            // Hide all steps
+            document.querySelectorAll('.form-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Show current step
+            document.getElementById(`step-${stepNumber}`).classList.add('active');
+            
+            // Update progress bar
+            const progressPercentage = (stepNumber / 5) * 100;
+            document.querySelector('.bg-blue-600').style.width = `${progressPercentage}%`;
+            
+            // Update step indicators
+            for (let i = 1; i <= 5; i++) {
+                const indicator = document.querySelector(`.flex.justify-between > div:nth-child(${i}) div`);
+                if (i <= stepNumber) {
+                    indicator.classList.remove('bg-gray-200', 'text-gray-600');
+                    indicator.classList.add('bg-blue-600', 'text-white');
+                } else {
+                    indicator.classList.remove('bg-blue-600', 'text-white');
+                    indicator.classList.add('bg-gray-200', 'text-gray-600');
+                }
+            }
+        }
+
+        function nextStep(currentStep) {
+            // Validate current step before proceeding
+            if (validateStep(currentStep)) {
+                showStep(currentStep + 1);
+            }
+        }
+
+        function prevStep(currentStep) {
+            showStep(currentStep - 1);
+        }
+
+        function validateStep(stepNumber) {
+            // Basic validation for step 1
+            if (stepNumber === 1) {
+                const requiredFields = [
+                    'applicant-name',
+                    'applicant-email',
+                    'applicant-phone',
+                    'business-type',
+                    'gst-number',
+                    'shop-registration'
+                ];
+                
+                let isValid = true;
+                
+                requiredFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (!field.value) {
+                        field.classList.add('border-red-500');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('border-red-500');
+                    }
+                });
+                
+                if (!isValid) {
+                    alert('Please fill all required fields before proceeding.');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // Form submission
+        document.getElementById('license-application').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Application submitted successfully!');
+            // In a real implementation, this would send data to the server
+        });
+    </script>
+</body>
+</html>
